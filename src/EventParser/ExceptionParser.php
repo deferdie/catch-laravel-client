@@ -36,6 +36,12 @@ class ExceptionParser
      */
     public static function parse($exception)
     {
+        self::setStatusCode($exception);
+        self::setMessage($exception);
+        self::setFile($exception);
+        self::setLine($exception);
+        self::setSeverity($exception);
+
         return new self;
     }
     
@@ -117,7 +123,9 @@ class ExceptionParser
      */
     public static function setSeverity($exception)
     {
-        self::$severity = $exception->getSeverity();
+        if (method_exists($exception, 'getSeverity')) {
+            self::$severity = $exception->getSeverity();
+        }
     }
     
     /**

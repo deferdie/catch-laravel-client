@@ -44,9 +44,14 @@ class Logger
 
                     // Log the exception
                     $Client = new Client();
+
                     $result = $Client->post('http://catch.test/log', [
                         'form_params' => [
-                            'sample-form-data' => 'value'
+                            'event' => json_encode([
+                                'exception' => self::$exception,
+                                'request' => self::$request
+                            ]),
+                            'client_id' => 34
                         ]
                     ]);
                 }
