@@ -2,6 +2,8 @@
 
 namespace CatchClient\EventParser;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 class ExceptionParser
 {
     /** 
@@ -29,6 +31,11 @@ class ExceptionParser
      */
     private static $severity = null;
     
+    /** 
+     * The stack trace of the exception
+     */
+    private static $stackTrace = null;
+    
     /**
      * Parse a Laravel Exception and return a  
      * converted JSON exception
@@ -41,6 +48,7 @@ class ExceptionParser
         self::setFile($exception);
         self::setLine($exception);
         self::setSeverity($exception);
+        self::setStackTrace($exception);
 
         return new self;
     }
@@ -51,7 +59,13 @@ class ExceptionParser
      */
     public static function setStatusCode($exception)
     {
-        self::$code = $exception->getCode();
+        if (method_exists($exception, 'getCode') && $exception->getCode() != 0) {
+            self::$code = $exception->getCode();
+        }
+
+        if (method_exists($exception, 'getStatusCode')) {
+            self::$code = $exception->getStatusCode();
+        }
     }
     
     /**
@@ -68,8 +82,17 @@ class ExceptionParser
      * 
      */
     public static function setMessage($exception)
-    {
-        self::$message = $exception->getMessage();
+    {       
+        // Get the event class as we know it is an object
+        if (gettype($exception) == "object") {
+            self::$message = $exception->getMessage();
+
+            // Get the event class as we know it is an object
+            if ((get_class($exception) === NotFoundHttpException::class)) {
+                // 404 Exception
+                self::$message = "File not found";
+            }
+        }
     }
     
     /**
@@ -87,7 +110,11 @@ class ExceptionParser
      */
     public static function setFile($exception)
     {
-        self::$file = $exception->getFile();
+        if (gettype($exception) == "object") {
+            if (method_exists($exception, 'getFile')) {
+                self::$file = $exception->getFile();
+            }
+        }
     }
     
     /**
@@ -105,7 +132,11 @@ class ExceptionParser
      */
     public static function setLine($exception)
     {
-        self::$line = $exception->getLine();
+        if (gettype($exception) == "object") {
+            if (method_exists($exception, 'getLine')) {
+                self::$line = $exception->getLine();
+            }
+        }
     }
     
     /**
@@ -126,6 +157,14 @@ class ExceptionParser
         if (method_exists($exception, 'getSeverity')) {
             self::$severity = $exception->getSeverity();
         }
+
+        if (gettype($exception) == "object") {
+            // Get the event class as we know it is an object
+            if ((get_class($exception) === NotFoundHttpException::class)) {
+                // 404 Exception
+                self::$severity = 8;
+            }
+        }
     }
     
     /**
@@ -135,6 +174,36 @@ class ExceptionParser
     public static function getSeverity()
     {
         return self::$severity;
+    }
+    
+    
+    /**
+     * Set the severity
+     * 
+     */
+    public static function setStackTrace($exception)
+    {
+        if (method_exists($exception, 'getTrace')) {
+            self::$stackTrace = $exception->getTrace();
+        }
+    }
+    
+    /**
+     * Get the severity
+     * 
+     */
+    public static function getStackTrace()
+    {
+        $stackTrace = [];
+
+        foreach (self::$stackTrace as $trace) {
+            array_push($stackTrace, [
+                'file' => (isset($trace['file']) ? $trace['file'] : ''),
+                'line' => (isset($trace['line']) ? $trace['line'] : '')
+            ]);
+        }
+        
+        return $stackTrace;
     }
     
     /**
@@ -148,7 +217,8 @@ class ExceptionParser
             'message' => self::getMessage(),
             'file' => self::getFile(),
             'line' => self::getLine(),
-            'severity' => self::getSeverity()
+            'severity' => self::getSeverity(),
+            'trace' => self::getStackTrace(),
         ]);
     }
 }

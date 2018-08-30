@@ -25,9 +25,11 @@ class RequestParser
      */
     private static $host = null;
 
-    public static function parse($request)
+    public static function parse()
     {
-        self::setHost($request);
+        self::setHost();
+        self::setUri();
+        self::setMethod();
 
         return new self;
     }
@@ -36,9 +38,9 @@ class RequestParser
      * Set the HTTP method
      * 
      */
-    public static function setMethod($request)
+    public static function setMethod()
     {
-        self::$method = $request->getMethod();
+        self::$method = $_SERVER['REQUEST_METHOD'];
     }
     
     /**
@@ -54,7 +56,7 @@ class RequestParser
      * Set the URI
      * 
      */
-    public static function setUri($request)
+    public static function setUri()
     {
         self::$uri = $_SERVER['REQUEST_URI'];
     }
@@ -72,7 +74,7 @@ class RequestParser
      * Set the URI
      * 
      */
-    public static function setHost($request)
+    public static function setHost()
     {
         self::$host = $_SERVER['HTTP_HOST'];
     }
