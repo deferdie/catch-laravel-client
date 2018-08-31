@@ -30,6 +30,9 @@ class Logger
     public static function log()
     {
         Event::listen('*', function ($eventName, array $data) {
+            if ($eventName != 'Illuminate\Foundation\Http\Events\RequestHandled') {
+                return;
+            }
 
             if (gettype($data) == 'array') {
                 $event = '';
@@ -62,6 +65,7 @@ class Logger
                 self::$exception = ExceptionParser::parse($event)->toJson();
                 self::$request = RequestParser::parse()->toJson();
                 self::sendEvent();
+                return;
             }
         });
     }
