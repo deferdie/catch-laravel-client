@@ -3,6 +3,8 @@
 namespace CatchClient;
 
 use GuzzleHttp\Client;
+use Monolog\Handler\HandlerWrapper;
+use CatchClient\Log\LogHandler;
 use Illuminate\Support\Facades\Event;
 use CatchClient\EventParser\RequestParser;
 use CatchClient\EventParser\ExceptionParser;
@@ -30,6 +32,7 @@ class Logger
     public static function log()
     {
         Event::listen('*', function ($eventName, array $data) {
+            dd($eventName);
             if ($eventName != 'Illuminate\Foundation\Http\Events\RequestHandled') {
                 return;
             }
@@ -86,5 +89,19 @@ class Logger
         ]);
         
         return;
+    }
+
+     /**
+     * Create a custom Monolog instance.
+     *
+     * @param  array  $config
+     * @return \Monolog\Logger
+     */
+    public function __invoke(array $config)
+    {
+        $logger = new \Monolog\Logger('test');
+        $logger->pushHandler(new HandlerWrapper(new LogHandler()));
+
+        return $logger;
     }
 }
