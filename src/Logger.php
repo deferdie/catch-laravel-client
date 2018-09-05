@@ -32,7 +32,6 @@ class Logger
     public static function log()
     {
         Event::listen('*', function ($eventName, array $data) {
-            dd($eventName);
             if ($eventName != 'Illuminate\Foundation\Http\Events\RequestHandled') {
                 return;
             }
@@ -84,7 +83,9 @@ class Logger
                     'exception' => self::$exception,
                     'request' => self::$request
                 ]),
-                'client_id' => 34
+                'application_id' => config('catch.application_id', env('CATCH_APPLICATION_ID')),
+                'key' => config('catch.application_key', env('CATCH_APPLICATION_KEY')),
+                'secret' => config('catch.application_secret', env('CATCH_APPLICATION_SECRET'))
             ]
         ]);
         
@@ -99,7 +100,7 @@ class Logger
      */
     public function __invoke(array $config)
     {
-        $logger = new \Monolog\Logger('test');
+        $logger = new \Monolog\Logger(config('catch.application_id', env('CATCH_APPLICATION_ID')));
         $logger->pushHandler(new HandlerWrapper(new LogHandler()));
 
         return $logger;

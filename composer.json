@@ -25,5 +25,10 @@
                 "CatchClient\\CatchServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php artisan vendor:publish --provider='CatchClient\/CatchServiceProvider'"
+        ]
     }
 }
