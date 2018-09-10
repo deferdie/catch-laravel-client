@@ -77,7 +77,7 @@ class Logger
         // Log the exception
         $Client = new Client();
 
-        $result = $Client->post('http://catch.test/log', [
+        $result = $Client->post(env('CATCH_ENDPOINT', 'http://catch.deferdie.co.uk/log'), [
             'form_params' => [
                 'event' => json_encode([
                     'exception' => self::$exception,
