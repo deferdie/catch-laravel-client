@@ -34,7 +34,7 @@ class LogHandler extends AbstractHandler
             ];
 
             // Send the log
-            $result = $Client->post(env('CATCH_ENDPOINT', 'http://catch.deferdie.co.uk/log'), [
+            $result = $Client->post(env('CATCH_ENDPOINT'), [
                 'form_params' => [
                     'event' => json_encode([
                         'log' => $log,
